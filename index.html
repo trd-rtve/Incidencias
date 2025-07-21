@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Incidencias TRD</title>
+    <title>Sistema de Gestión de Errores</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -85,7 +85,7 @@
             const getCurrentDateTime = () => {
                 const now = new Date();
                 // Ajustar para zona horaria CEST (UTC+2)
-                const cestTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (60000 * 240)); // UTC+2
+                const cestTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (60000 * 120)); // UTC+2
                 return cestTime.toISOString().slice(0, 16);
             };
 
@@ -208,13 +208,13 @@
                     .filter(error => error.programa === activeTab.replace('_', ' '))
                     .filter(error => 
                         error.incidencia.toLowerCase().includes(searchTerm.toLowerCase())
-                    );
+                    )
                     .sort((a, b) => {
-                            // Ordenar por fecha y hora, de más nueva a más antigua
-                            const dateA = new Date(a.dia);
-                            const dateB = new Date(b.dia);
-                            return dateB - dateA; // descendente (más nueva primero)
-                        });
+                        // Ordenar por fecha y hora, de más nueva a más antigua
+                        const dateA = new Date(a.dia);
+                        const dateB = new Date(b.dia);
+                        return dateB - dateA; // descendente (más nueva primero)
+                    });
                 setFilteredErrors(filtered);
             }, [errors, activeTab, searchTerm]);
 
@@ -267,7 +267,7 @@
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div className="flex justify-between items-center py-4">
                                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                                    🔧 Incidencias TRD
+                                    🔧 Sistema de Gestión de Errores
                                 </h1>
                                 <button
                                     onClick={() => openModal()}
