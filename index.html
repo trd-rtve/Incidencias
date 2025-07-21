@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Errores</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#1E293B',
+                        accent: '#F59E0B'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Configuración de Firebase (credenciales codificadas)
+        const firebaseConfig = {
+            apiKey: atob('QUl6YVN5RDhDaGNONF9tV0J4dTljODBjSWxja05INVh6d0Q0aXA4'),
+            authDomain: atob('c2lzdGVtYS1lcnJvcmVzLWFwcHMuZmlyZWJhc2VhcHAuY29t'),
+            projectId: atob('c2lzdGVtYS1lcnJvcmVzLWFwcHM='),
+            storageBucket: atob('c2lzdGVtYS1lcnJvcmVzLWFwcHMuZmlyZWJhc2VzdG9yYWdlLmFwcA=='),
+            messagingSenderId: atob('OTU2NjI0MjcyODkz'),
+            appId: atob('MTo5NTY2MjQyNzI4OTM6d2ViOjkyNjI3MjkzZWNiNDZmNWNmZjJkOTQ=')
+        };
+
+        // Inicializar Firebase solo si no está ya inicializado
+        let app, db;
+        try {
+            app = firebase.app();
+            db = firebase.firestore();
+        } catch (error) {
+            app = firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+        }
+
+        const ErrorTracker = () => {
+            const [activeTab, setActiveTab] = useState('LOTERIAS');
+            const [errors, setErrors] = useState([]);
+            const [filteredErrors, setFilteredErrors] = useState([]);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [showModal, setShowModal] = useState(false);
+            const [currentError, setCurrentError] = useState(null);
+            const [showDetailModal, setShowDetailModal] = useState(false);
+            const [detailContent, setDetailContent] = useState('');
+            const [detailTitle, setDetailTitle] = useState('');
+            const [loading, setLoading] = useState(false);
+
+            const tabs = [
+                { id: 'LOTERIAS', name: 'Loterías', icon: '🎰' },
+                { id: 'LENGUA_SIGNOS', name: 'Lengua de Signos', icon: '👋' },
+                { id: 'WHATSAPP_WEB', name: 'WhatsApp Web', icon: '💬' }
+            ];
+
+            const personas = [
+                'CARLOS PELAYO',
+                'FEDE', 
+                'CARLOS SALGADO',
+                'MOHA',
+                'MARIO',
+                'ALEX',
+                'RAUL',
+                'RUBEN',
+                'DAVID',
+                'PAULA',
+                'SOFIA'
+            ];
+
+            const getCurrentDateTime = () => {
+                const now = new Date();
+                // Ajustar para zona horaria CEST (UTC+2)
+                const cestTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (60000 * 120)); // UTC+2
+                return cestTime.toISOString().slice(0, 16);
+            };
+
+            const formatDateTime = (dateString) => {
+                if (!dateString) return '';
+                const date = new Date(dateString);
+                return date.toLocaleString('es-ES', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: 'Europe/Madrid'
+                });
+            };
+
+            const emptyError = {
+                id: '',
+                dia: getCurrentDateTime(),
+                lugar: 'TORRESPAÑA',
+                programa: activeTab.replace('_', ' '),
+                camara: 'NINGUNA',
+                incidencia: '',
+                solucion: '',
+                persona: '',
+                area: 'JESUS'
+            };
+
+            // Cargar errores de Firebase
+            const loadErrors = async () => {
+                setLoading(true);
+                try {
+                    const snapshot = await db.collection('errors').get();
+                    const errorsList = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    setErrors(errorsList);
+                } catch (error) {
+                    console.error('Error cargando datos:', error);
+                    // Datos de ejemplo si no hay conexión a Firebase
+                    const exampleData = [
+                        {
+                            id: '1',
+                            dia: '2025-07-14T20:00',
+                            lugar: 'TORRESPAÑA',
+                            programa: 'LOTERIAS',
+                            camara: 'NINGUNA',
+                            incidencia: 'No saca señal de video.',
+                            solucion: 'Hay un folder con la configuración y se ha pulsado el botón que no es.',
+                            persona: 'FEDE',
+                            area: 'JESUS'
+                        },
+                        {
+                            id: '2',
+                            dia: '2025-07-15T20:00',
+                            lugar: 'TORRESPAÑA',
+                            programa: 'LOTERIAS',
+                            camara: '',
+                            incidencia: 'Mapa de Andalucía tiene Murcia pintado.',
+                            solucion: 'Cambia el mapa de Andalucía quitando la parte de Murcia.',
+                            persona: 'MOHA',
+                            area: 'JESUS'
+                        },
+                        {
+                            id: '3',
+                            dia: '2025-07-16T19:30',
+                            lugar: 'TORRESPAÑA',
+                            programa: 'LOTERIAS',
+                            camara: 'TODAS',
+                            incidencia: 'El décimo tiene mucha emisión.',
+                            solucion: 'Se baja en Unreal la emisión del material del décimo.',
+                            persona: 'MARIO -> MOHA',
+                            area: 'JESUS'
+                        }
+                    ];
+                    setErrors(exampleData);
+                }
+                setLoading(false);
+            };
+
+            // Guardar error en Firebase
+            const saveError = async (errorData) => {
+                try {
+                    if (errorData.id && errorData.id !== '') {
+                        // Actualizar error existente
+                        const { id, ...dataToUpdate } = errorData;
+                        await db.collection('errors').doc(id).update(dataToUpdate);
+                    } else {
+                        // Crear nuevo error
+                        const { id, ...dataToCreate } = errorData;
+                        await db.collection('errors').add(dataToCreate);
+                    }
+                    loadErrors();
+                } catch (error) {
+                    console.error('Error guardando:', error);
+                    alert('Error al guardar. Verifica la configuración de Firebase.');
+                }
+            };
+
+            // Eliminar error
+            const deleteError = async (id) => {
+                if (confirm('¿Estás seguro de que quieres eliminar este error?')) {
+                    try {
+                        await db.collection('errors').doc(id).delete();
+                        loadErrors();
+                    } catch (error) {
+                        console.error('Error eliminando:', error);
+                        alert('Error al eliminar. Verifica la conexión con Firebase.');
+                    }
+                }
+            };
+
+            useEffect(() => {
+                loadErrors();
+            }, []);
+
+            useEffect(() => {
+                const filtered = errors
+                    .filter(error => error.programa === activeTab.replace('_', ' '))
+                    .filter(error => 
+                        error.incidencia.toLowerCase().includes(searchTerm.toLowerCase())
+                    );
+                setFilteredErrors(filtered);
+            }, [errors, activeTab, searchTerm]);
+
+            const openModal = (error = null) => {
+                if (error) {
+                    setCurrentError({...error});
+                } else {
+                    setCurrentError({
+                        ...emptyError,
+                        programa: activeTab.replace('_', ' ')
+                    });
+                }
+                setShowModal(true);
+            };
+
+            const closeModal = () => {
+                setShowModal(false);
+                setCurrentError(null);
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const errorData = {
+                    id: currentError?.id || '',
+                    dia: formData.get('dia'),
+                    lugar: formData.get('lugar'),
+                    programa: formData.get('programa'),
+                    camara: formData.get('camara'),
+                    incidencia: formData.get('incidencia'),
+                    solucion: formData.get('solucion'),
+                    persona: formData.get('persona'),
+                    area: formData.get('area')
+                };
+                
+                saveError(errorData);
+                closeModal();
+            };
+
+            const showDetail = (content, title) => {
+                setDetailContent(content);
+                setDetailTitle(title);
+                setShowDetailModal(true);
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+                    {/* Header */}
+                    <div className="bg-white shadow-lg border-b border-gray-200">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center py-4">
+                                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                                    🔧 Sistema de Gestión de Errores
+                                </h1>
+                                <button
+                                    onClick={() => openModal()}
+                                    className="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 shadow-md hover:shadow-lg"
+                                >
+                                    + Nuevo Error
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                        {/* Tabs */}
+                        <div className="mb-6">
+                            <div className="border-b border-gray-200">
+                                <nav className="-mb-px flex space-x-8 overflow-x-auto">
+                                    {tabs.map((tab) => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setActiveTab(tab.id)}
+                                            className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
+                                                activeTab === tab.id
+                                                    ? 'border-primary text-primary'
+                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
+                                        >
+                                            <span className="text-lg">{tab.icon}</span>
+                                            <span>{tab.name}</span>
+                                        </button>
+                                    ))}
+                                </nav>
+                            </div>
+                        </div>
+
+                        {/* Search */}
+                        <div className="mb-6">
+                            <div className="relative max-w-md">
+                                <input
+                                    type="text"
+                                    placeholder="Buscar en incidencias..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                />
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Errors List */}
+                        {loading ? (
+                            <div className="text-center py-12">
+                                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+                                <p className="mt-4 text-gray-600">Cargando errores...</p>
+                            </div>
+                        ) : (
+                            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                                {filteredErrors.length === 0 ? (
+                                    <div className="text-center py-12">
+                                        <div className="text-6xl mb-4">📝</div>
+                                        <h3 className="text-lg font-medium text-gray-900 mb-2">No hay errores registrados</h3>
+                                        <p className="text-gray-600">Comienza añadiendo el primer error para esta aplicación.</p>
+                                    </div>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <table className="min-w-full divide-y divide-gray-200">
+                                            <thead className="bg-gray-50">
+                                                <tr>
+                                                    <th className="min-w-32 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Día</th>
+                                                    <th className="min-w-20 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lugar</th>
+                                                    <th className="min-w-24 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Programa</th>
+                                                    <th className="min-w-20 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cámara</th>
+                                                    <th className="min-w-64 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Incidencia</th>
+                                                    <th className="min-w-64 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solución</th>
+                                                    <th className="min-w-24 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Persona</th>
+                                                    <th className="min-w-20 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
+                                                    <th className="min-w-20 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="bg-white divide-y divide-gray-200">
+                                                {filteredErrors.map((error) => (
+                                                    <tr key={error.id} className="hover:bg-gray-50">
+                                                        <td className="px-2 py-4 text-sm text-gray-900 whitespace-nowrap">
+                                                            {formatDateTime(error.dia)}
+                                                        </td>
+                                                        <td className="px-2 py-4 text-sm text-gray-900 whitespace-nowrap">{error.lugar}</td>
+                                                        <td className="px-2 py-4 text-sm text-gray-900 whitespace-nowrap">{error.programa}</td>
+                                                        <td className="px-2 py-4 text-sm text-gray-900 whitespace-nowrap">{error.camara}</td>
+                                                        <td className="px-2 py-4 text-sm text-gray-900">
+                                                            <div className="flex items-center">
+                                                                <span className="max-w-xs truncate">{error.incidencia}</span>
+                                                                {error.incidencia && error.incidencia.length > 30 && (
+                                                                    <button
+                                                                        onClick={() => showDetail(error.incidencia, 'Incidencia')}
+                                                                        className="ml-2 text-primary hover:text-blue-700 text-xs flex-shrink-0"
+                                                                    >
+                                                                        Ver más
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-2 py-4 text-sm text-gray-900">
+                                                            <div className="flex items-center">
+                                                                <span className="max-w-xs truncate">{error.solucion}</span>
+                                                                {error.solucion && error.solucion.length > 30 && (
+                                                                    <button
+                                                                        onClick={() => showDetail(error.solucion, 'Solución')}
+                                                                        className="ml-2 text-primary hover:text-blue-700 text-xs flex-shrink-0"
+                                                                    >
+                                                                        Ver más
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-2 py-4 text-sm text-gray-900 whitespace-nowrap">{error.persona}</td>
+                                                        <td className="px-2 py-4 text-sm text-gray-900 whitespace-nowrap">{error.area}</td>
+                                                        <td className="px-2 py-4 text-right text-sm font-medium space-x-2 whitespace-nowrap">
+                                                            <button
+                                                                onClick={() => openModal(error)}
+                                                                className="text-primary hover:text-blue-700"
+                                                                title="Editar"
+                                                            >
+                                                                ✏️
+                                                            </button>
+                                                            <button
+                                                                onClick={() => deleteError(error.id)}
+                                                                className="text-red-600 hover:text-red-900"
+                                                                title="Eliminar"
+                                                            >
+                                                                🗑️
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Modal for Add/Edit */}
+                    {showModal && (
+                        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                            <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl bg-white rounded-lg shadow-xl">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900">
+                                        {currentError?.id ? 'Editar Error' : 'Nuevo Error'}
+                                    </h3>
+                                    <button
+                                        onClick={closeModal}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Día y Hora</label>
+                                            <input
+                                                type="datetime-local"
+                                                name="dia"
+                                                defaultValue={currentError?.dia}
+                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Lugar</label>
+                                            <select
+                                                name="lugar"
+                                                defaultValue={currentError?.lugar}
+                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                required
+                                            >
+                                                <option value="TORRESPAÑA">TORRESPAÑA</option>
+                                                <option value="PRADO DEL REY">PRADO DEL REY</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Programa</label>
+                                            <input
+                                                type="text"
+                                                name="programa"
+                                                defaultValue={currentError?.programa}
+                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Cámara</label>
+                                            <input
+                                                type="text"
+                                                name="camara"
+                                                defaultValue={currentError?.camara}
+                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Incidencia</label>
+                                        <textarea
+                                            name="incidencia"
+                                            rows="3"
+                                            defaultValue={currentError?.incidencia}
+                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                            required
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Solución</label>
+                                        <textarea
+                                            name="solucion"
+                                            rows="3"
+                                            defaultValue={currentError?.solucion}
+                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        />
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Persona</label>
+                                            <select
+                                                name="persona"
+                                                defaultValue={currentError?.persona || ''}
+                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                required
+                                            >
+                                                <option value="">Seleccionar persona...</option>
+                                                {personas.map((persona) => (
+                                                    <option key={persona} value={persona}>
+                                                        {persona}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Área</label>
+                                            <input
+                                                type="text"
+                                                name="area"
+                                                defaultValue={currentError?.area}
+                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex justify-end space-x-3 pt-4">
+                                        <button
+                                            type="button"
+                                            onClick={closeModal}
+                                            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                        >
+                                            Cancelar
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="px-4 py-2 bg-primary border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700"
+                                        >
+                                            {currentError?.id ? 'Actualizar' : 'Crear'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Modal for Detail View */}
+                    {showDetailModal && (
+                        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                            <div className="relative top-20 mx-auto p-5 border w-full max-w-lg bg-white rounded-lg shadow-xl">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900">{detailTitle}</h3>
+                                    <button
+                                        onClick={() => setShowDetailModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                <div className="text-sm text-gray-700 whitespace-pre-wrap">
+                                    {detailContent}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<ErrorTracker />, document.getElementById('root'));
+    </script>
+</body>
+</html>
