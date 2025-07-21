@@ -209,6 +209,12 @@
                     .filter(error => 
                         error.incidencia.toLowerCase().includes(searchTerm.toLowerCase())
                     );
+                    .sort((a, b) => {
+                            // Ordenar por fecha y hora, de más nueva a más antigua
+                            const dateA = new Date(a.dia);
+                            const dateB = new Date(b.dia);
+                            return dateB - dateA; // descendente (más nueva primero)
+                        });
                 setFilteredErrors(filtered);
             }, [errors, activeTab, searchTerm]);
 
