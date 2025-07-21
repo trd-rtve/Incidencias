@@ -85,7 +85,7 @@
             const getCurrentDateTime = () => {
                 const now = new Date();
                 // Ajustar para zona horaria CEST (UTC+2)
-                const cestTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (60000 * 240)); // UTC+2
+                const cestTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (60000 * 120)); // UTC+2
                 return cestTime.toISOString().slice(0, 16);
             };
 
@@ -329,19 +329,19 @@
                                         <p className="text-gray-600">Comienza añadiendo el primer error para esta aplicación.</p>
                                     </div>
                                 ) : (
-                                    <div className="overflow-x-auto">
+                                    <div className="overflow-x-auto lg:overflow-x-visible">
                                         <table className="min-w-full divide-y divide-gray-200">
                                             <thead className="bg-gray-50">
                                                 <tr>
-                                                    <th className="min-w-32 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Día</th>
-                                                    <th className="min-w-20 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lugar</th>
-                                                    <th className="min-w-24 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Programa</th>
-                                                    <th className="min-w-20 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cámara</th>
-                                                    <th className="min-w-64 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Incidencia</th>
-                                                    <th className="min-w-64 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solución</th>
-                                                    <th className="min-w-24 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Persona</th>
-                                                    <th className="min-w-20 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
-                                                    <th className="min-w-20 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                                    <th className="min-w-32 lg:w-auto px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Día</th>
+                                                    <th className="min-w-20 lg:w-auto px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lugar</th>
+                                                    <th className="min-w-24 lg:w-auto px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Programa</th>
+                                                    <th className="min-w-20 lg:w-auto px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cámara</th>
+                                                    <th className="min-w-64 lg:w-80 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Incidencia</th>
+                                                    <th className="min-w-64 lg:w-80 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solución</th>
+                                                    <th className="min-w-24 lg:w-auto px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Persona</th>
+                                                    <th className="min-w-20 lg:w-auto px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
+                                                    <th className="min-w-20 lg:w-auto px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="bg-white divide-y divide-gray-200">
@@ -353,9 +353,9 @@
                                                         <td className="px-2 py-4 text-sm text-gray-900 whitespace-nowrap">{error.lugar}</td>
                                                         <td className="px-2 py-4 text-sm text-gray-900 whitespace-nowrap">{error.programa}</td>
                                                         <td className="px-2 py-4 text-sm text-gray-900 whitespace-nowrap">{error.camara}</td>
-                                                        <td className="px-2 py-4 text-sm text-gray-900">
+                                                        <td className="px-2 py-4 text-sm text-gray-900 lg:max-w-80">
                                                             <div className="flex items-center">
-                                                                <span className="max-w-xs truncate">{error.incidencia}</span>
+                                                                <span className="max-w-xs lg:max-w-none truncate lg:truncate">{error.incidencia}</span>
                                                                 {error.incidencia && error.incidencia.length > 30 && (
                                                                     <button
                                                                         onClick={() => showDetail(error.incidencia, 'Incidencia')}
@@ -366,9 +366,9 @@
                                                                 )}
                                                             </div>
                                                         </td>
-                                                        <td className="px-2 py-4 text-sm text-gray-900">
+                                                        <td className="px-2 py-4 text-sm text-gray-900 lg:max-w-80">
                                                             <div className="flex items-center">
-                                                                <span className="max-w-xs truncate">{error.solucion}</span>
+                                                                <span className="max-w-xs lg:max-w-none truncate lg:truncate">{error.solucion}</span>
                                                                 {error.solucion && error.solucion.length > 30 && (
                                                                     <button
                                                                         onClick={() => showDetail(error.solucion, 'Solución')}
