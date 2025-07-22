@@ -23,6 +23,15 @@
             }
         }
     </script>
+    <style>
+        .backdrop-blur-xl {
+            backdrop-filter: blur(24px);
+        }
+        
+        .backdrop-blur-sm {
+            backdrop-filter: blur(4px);
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <div id="root"></div>
@@ -50,7 +59,113 @@
             db = firebase.firestore();
         }
 
+        // Componente de Login
+        const LoginModal = ({ isOpen, onLogin, error, onPasswordChange, password }) => {
+            const [showPassword, setShowPassword] = useState(false);
+            
+            if (!isOpen) return null;
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onLogin();
+            };
+
+            const handleKeyPress = (e) => {
+                if (e.key === 'Enter') {
+                    onLogin();
+                }
+            };
+
+            const togglePasswordVisibility = () => {
+                setShowPassword(!showPassword);
+            };
+
+            return (
+                <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 bg-opacity-95 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl w-full max-w-md mx-auto">
+                        <div className="px-8 py-10">
+                            {/* Header section */}
+                            <div className="text-center mb-8">
+                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg mb-6">
+                                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                    </svg>
+                                </div>
+                                
+                                <h2 className="text-2xl font-bold text-white mb-2">
+                                    Indidencias TRD
+                                </h2>
+                                <p className="text-gray-300">
+                                    Ingresa tu contraseña para continuar
+                                </p>
+                            </div>
+                            
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div className="space-y-2">
+                                    <label htmlFor="password" className="block text-sm font-medium text-gray-200">
+                                        Contraseña
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            id="password"
+                                            value={password}
+                                            onChange={onPasswordChange}
+                                            onKeyPress={handleKeyPress}
+                                            className={`w-full px-4 py-3 bg-white/10 border backdrop-blur-sm rounded-xl text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 pr-12 ${
+                                                error ? 'border-red-400 focus:ring-red-400' : 'border-white/30'
+                                            }`}
+                                            placeholder="Ingresa tu contraseña"
+                                            autoFocus
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={togglePasswordVisibility}
+                                            className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-300 hover:text-white transition-colors"
+                                        >
+                                            {showPassword ? (
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
+                                                </svg>
+                                            ) : (
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                </svg>
+                                            )}
+                                        </button>
+                                    </div>
+                                    
+                                    {error && (
+                                        <div className="bg-red-500/20 border border-red-400/30 rounded-xl p-3">
+                                            <p className="text-sm text-red-200 flex items-center">
+                                                <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                {error}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                <button
+                                    type="submit"
+                                    className="w-full py-3 px-6 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-transparent"
+                                >
+                                    Acceder al Sistema
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
         const ErrorTracker = () => {
+            const [isAuthenticated, setIsAuthenticated] = useState(false);
+            const [showLoginModal, setShowLoginModal] = useState(true);
+            const [password, setPassword] = useState('');
+            const [loginError, setLoginError] = useState('');
             const [activeTab, setActiveTab] = useState('LOTERIAS');
             const [errors, setErrors] = useState([]);
             const [filteredErrors, setFilteredErrors] = useState([]);
@@ -61,6 +176,8 @@
             const [detailContent, setDetailContent] = useState('');
             const [detailTitle, setDetailTitle] = useState('');
             const [loading, setLoading] = useState(false);
+
+            const CORRECT_PASSWORD = 'Auto1041';
 
             const tabs = [
                 { id: 'LOTERIAS', name: 'Loterías', icon: '🎰' },
@@ -81,6 +198,37 @@
                 'PAULA',
                 'SOFIA'
             ];
+
+            // Verificar autenticación al cargar
+            useEffect(() => {
+                const authStatus = sessionStorage.getItem('errorTracker_authenticated');
+                if (authStatus === 'true') {
+                    setIsAuthenticated(true);
+                    setShowLoginModal(false);
+                }
+            }, []);
+
+            const handleLogin = () => {
+                if (password === CORRECT_PASSWORD) {
+                    setIsAuthenticated(true);
+                    setShowLoginModal(false);
+                    setLoginError('');
+                    sessionStorage.setItem('errorTracker_authenticated', 'true');
+                } else {
+                    setLoginError('Contraseña incorrecta. Inténtalo de nuevo.');
+                    setPassword('');
+                    // Limpiar el error después de 3 segundos
+                    setTimeout(() => setLoginError(''), 3000);
+                }
+            };
+
+            const handleLogout = () => {
+                setIsAuthenticated(false);
+                setShowLoginModal(true);
+                setPassword('');
+                setLoginError('');
+                sessionStorage.removeItem('errorTracker_authenticated');
+            };
 
             const getCurrentDateTime = () => {
                 const now = new Date();
@@ -116,6 +264,8 @@
 
             // Cargar errores de Firebase
             const loadErrors = async () => {
+                if (!isAuthenticated) return;
+                
                 setLoading(true);
                 try {
                     const snapshot = await db.collection('errors').get();
@@ -126,43 +276,6 @@
                     setErrors(errorsList);
                 } catch (error) {
                     console.error('Error cargando datos:', error);
-                    // Datos de ejemplo si no hay conexión a Firebase
-                    const exampleData = [
-                        {
-                            id: '1',
-                            dia: '2025-07-14T20:00',
-                            lugar: 'TORRESPAÑA',
-                            programa: 'LOTERIAS',
-                            camara: 'NINGUNA',
-                            incidencia: 'No saca señal de video.',
-                            solucion: 'Hay un folder con la configuración y se ha pulsado el botón que no es.',
-                            persona: 'FEDE',
-                            area: 'JESUS'
-                        },
-                        {
-                            id: '2',
-                            dia: '2025-07-15T20:00',
-                            lugar: 'TORRESPAÑA',
-                            programa: 'LOTERIAS',
-                            camara: '',
-                            incidencia: 'Mapa de Andalucía tiene Murcia pintado.',
-                            solucion: 'Cambia el mapa de Andalucía quitando la parte de Murcia.',
-                            persona: 'MOHA',
-                            area: 'JESUS'
-                        },
-                        {
-                            id: '3',
-                            dia: '2025-07-16T19:30',
-                            lugar: 'TORRESPAÑA',
-                            programa: 'LOTERIAS',
-                            camara: 'TODAS',
-                            incidencia: 'El décimo tiene mucha emisión.',
-                            solucion: 'Se baja en Unreal la emisión del material del décimo.',
-                            persona: 'MARIO -> MOHA',
-                            area: 'JESUS'
-                        }
-                    ];
-                    setErrors(exampleData);
                 }
                 setLoading(false);
             };
@@ -200,8 +313,10 @@
             };
 
             useEffect(() => {
-                loadErrors();
-            }, []);
+                if (isAuthenticated) {
+                    loadErrors();
+                }
+            }, [isAuthenticated]);
 
             useEffect(() => {
                 const filtered = errors
@@ -262,347 +377,373 @@
 
             return (
                 <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-                    {/* Header */}
-                    <div className="bg-white shadow-lg border-b border-gray-200">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="flex justify-between items-center py-4">
-                                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                                    🔧 Sistema de Gestión de Errores
-                                </h1>
-                                <button
-                                    onClick={() => openModal()}
-                                    className="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 shadow-md hover:shadow-lg"
-                                >
-                                    + Nuevo Error
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    {/* Login Modal */}
+                    <LoginModal
+                        isOpen={showLoginModal}
+                        onLogin={handleLogin}
+                        error={loginError}
+                        password={password}
+                        onPasswordChange={(e) => setPassword(e.target.value)}
+                    />
 
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                        {/* Tabs */}
-                        <div className="mb-6">
-                            <div className="border-b border-gray-200">
-                                <nav className="-mb-px flex space-x-8 overflow-x-auto">
-                                    {tabs.map((tab) => (
-                                        <button
-                                            key={tab.id}
-                                            onClick={() => setActiveTab(tab.id)}
-                                            className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
-                                                activeTab === tab.id
-                                                    ? 'border-primary text-primary'
-                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                            }`}
-                                        >
-                                            <span className="text-lg">{tab.icon}</span>
-                                            <span>{tab.name}</span>
-                                        </button>
-                                    ))}
-                                </nav>
-                            </div>
-                        </div>
-
-                        {/* Search */}
-                        <div className="mb-6">
-                            <div className="relative max-w-md">
-                                <input
-                                    type="text"
-                                    placeholder="Buscar en incidencias..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                />
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                    </svg>
+                    {/* Main Application */}
+                    {isAuthenticated && (
+                        <>
+                            {/* Header */}
+                            <div className="bg-white shadow-lg border-b border-gray-200">
+                                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                                    <div className="flex justify-between items-center py-4">
+                                        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
+                                            🔧 Sistema de Gestión de Errores
+                                        </h1>
+                                        <div className="flex items-center space-x-3">
+                                            <button
+                                                onClick={() => openModal()}
+                                                className="bg-primary hover:bg-blue-700 text-white px-3 py-2 sm:px-4 rounded-lg font-medium transition-colors duration-200 shadow-md hover:shadow-lg text-sm sm:text-base"
+                                            >
+                                                + Nuevo Error
+                                            </button>
+                                            <button
+                                                onClick={handleLogout}
+                                                className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg font-medium transition-colors duration-200 shadow-md hover:shadow-lg text-sm sm:text-base flex items-center"
+                                                title="Cerrar Sesión"
+                                            >
+                                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                                </svg>
+                                                <span className="hidden sm:inline">Salir</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Errors List */}
-                        {loading ? (
-                            <div className="text-center py-12">
-                                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-                                <p className="mt-4 text-gray-600">Cargando errores...</p>
-                            </div>
-                        ) : (
-                            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                                {filteredErrors.length === 0 ? (
+                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                                {/* Tabs */}
+                                <div className="mb-6">
+                                    <div className="border-b border-gray-200">
+                                        <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto">
+                                            {tabs.map((tab) => (
+                                                <button
+                                                    key={tab.id}
+                                                    onClick={() => setActiveTab(tab.id)}
+                                                    className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
+                                                        activeTab === tab.id
+                                                            ? 'border-primary text-primary'
+                                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                                    }`}
+                                                >
+                                                    <span className="text-lg">{tab.icon}</span>
+                                                    <span className="hidden sm:inline">{tab.name}</span>
+                                                </button>
+                                            ))}
+                                        </nav>
+                                    </div>
+                                </div>
+
+                                {/* Search */}
+                                <div className="mb-6">
+                                    <div className="relative max-w-md">
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar en incidencias..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        />
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Errors List */}
+                                {loading ? (
                                     <div className="text-center py-12">
-                                        <div className="text-6xl mb-4">📝</div>
-                                        <h3 className="text-lg font-medium text-gray-900 mb-2">No hay errores registrados</h3>
-                                        <p className="text-gray-600">Comienza añadiendo el primer error para esta aplicación.</p>
+                                        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+                                        <p className="mt-4 text-gray-600">Cargando errores...</p>
                                     </div>
                                 ) : (
-                                    <div className="overflow-x-auto lg:overflow-x-visible">
-                                        <table className="w-full table-fixed border-collapse">
-                                            <colgroup>
-                                                <col style={{width: '140px'}} />  {/* Día */}
-                                                <col style={{width: '100px'}} />  {/* Lugar */}
-                                                <col style={{width: '100px'}} />  {/* Programa */}
-                                                <col style={{width: '80px'}} />   {/* Cámara */}
-                                                <col style={{width: '250px'}} />  {/* Incidencia */}
-                                                <col style={{width: '250px'}} />  {/* Solución */}
-                                                <col style={{width: '120px'}} />  {/* Persona */}
-                                                <col style={{width: '80px'}} />   {/* Área */}
-                                                <col style={{width: '80px'}} />   {/* Acciones */}
-                                            </colgroup>
-                                            <thead className="bg-gray-50">
-                                                <tr className="divide-x divide-gray-200">
-                                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Día</th>
-                                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lugar</th>
-                                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Programa</th>
-                                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cámara</th>
-                                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Incidencia</th>
-                                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solución</th>
-                                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Persona</th>
-                                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
-                                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="bg-white divide-y divide-gray-200">
-                                                {filteredErrors.map((error) => (
-                                                    <tr key={error.id} className="hover:bg-gray-50 divide-x divide-gray-200">
-                                                        <td className="px-2 py-4 text-sm text-gray-900">
-                                                            <div className="truncate" title={formatDateTime(error.dia)}>
-                                                                {formatDateTime(error.dia)}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-2 py-4 text-sm text-gray-900">
-                                                            <div className="truncate" title={error.lugar}>
-                                                                {error.lugar}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-2 py-4 text-sm text-gray-900">
-                                                            <div className="truncate" title={error.programa}>
-                                                                {error.programa}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-2 py-4 text-sm text-gray-900">
-                                                            <div className="truncate" title={error.camara}>
-                                                                {error.camara}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-2 py-4 text-sm text-gray-900">
-                                                            <div className="flex items-center">
-                                                                <div className="truncate flex-1" title={error.incidencia}>
-                                                                    {error.incidencia}
-                                                                </div>
-                                                                {error.incidencia && error.incidencia.length > 30 && (
+                                    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                                        {filteredErrors.length === 0 ? (
+                                            <div className="text-center py-12">
+                                                <div className="text-6xl mb-4">📝</div>
+                                                <h3 className="text-lg font-medium text-gray-900 mb-2">No hay errores registrados</h3>
+                                                <p className="text-gray-600">Comienza añadiendo el primer error para esta aplicación.</p>
+                                            </div>
+                                        ) : (
+                                            <div className="overflow-x-auto lg:overflow-x-visible">
+                                                <table className="w-full table-fixed border-collapse">
+                                                    <colgroup>
+                                                        <col style={{width: '120px'}} />  {/* Día */}
+                                                        <col style={{width: '100px'}} />  {/* Lugar */}
+                                                        <col style={{width: '100px'}} />  {/* Programa */}
+                                                        <col style={{width: '80px'}} />   {/* Cámara */}
+                                                        <col style={{width: '250px'}} />  {/* Incidencia */}
+                                                        <col style={{width: '250px'}} />  {/* Solución */}
+                                                        <col style={{width: '120px'}} />  {/* Persona */}
+                                                        <col style={{width: '80px'}} />   {/* Área */}
+                                                        <col style={{width: '80px'}} />   {/* Acciones */}
+                                                    </colgroup>
+                                                    <thead className="bg-gray-50">
+                                                        <tr className="divide-x divide-gray-200">
+                                                            <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Día</th>
+                                                            <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lugar</th>
+                                                            <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Programa</th>
+                                                            <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cámara</th>
+                                                            <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Incidencia</th>
+                                                            <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solución</th>
+                                                            <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Persona</th>
+                                                            <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
+                                                            <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="bg-white divide-y divide-gray-200">
+                                                        {filteredErrors.map((error) => (
+                                                            <tr key={error.id} className="hover:bg-gray-50 divide-x divide-gray-200">
+                                                                <td className="px-2 py-4 text-sm text-gray-900">
+                                                                    <div className="truncate" title={formatDateTime(error.dia)}>
+                                                                        {formatDateTime(error.dia)}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-2 py-4 text-sm text-gray-900">
+                                                                    <div className="truncate" title={error.lugar}>
+                                                                        {error.lugar}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-2 py-4 text-sm text-gray-900">
+                                                                    <div className="truncate" title={error.programa}>
+                                                                        {error.programa}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-2 py-4 text-sm text-gray-900">
+                                                                    <div className="truncate" title={error.camara}>
+                                                                        {error.camara}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-2 py-4 text-sm text-gray-900">
+                                                                    <div className="flex items-center">
+                                                                        <div className="truncate flex-1" title={error.incidencia}>
+                                                                            {error.incidencia}
+                                                                        </div>
+                                                                        {error.incidencia && error.incidencia.length > 30 && (
+                                                                            <button
+                                                                                onClick={() => showDetail(error.incidencia, 'Incidencia')}
+                                                                                className="ml-1 text-primary hover:text-blue-700 text-xs flex-shrink-0"
+                                                                            >
+                                                                                +
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-2 py-4 text-sm text-gray-900">
+                                                                    <div className="flex items-center">
+                                                                        <div className="truncate flex-1" title={error.solucion}>
+                                                                            {error.solucion}
+                                                                        </div>
+                                                                        {error.solucion && error.solucion.length > 30 && (
+                                                                            <button
+                                                                                onClick={() => showDetail(error.solucion, 'Solución')}
+                                                                                className="ml-1 text-primary hover:text-blue-700 text-xs flex-shrink-0"
+                                                                            >
+                                                                                +
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-2 py-4 text-sm text-gray-900">
+                                                                    <div className="truncate" title={error.persona}>
+                                                                        {error.persona}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-2 py-4 text-sm text-gray-900">
+                                                                    <div className="truncate" title={error.area}>
+                                                                        {error.area}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-2 py-4 text-center text-sm font-medium">
                                                                     <button
-                                                                        onClick={() => showDetail(error.incidencia, 'Incidencia')}
-                                                                        className="ml-1 text-primary hover:text-blue-700 text-xs flex-shrink-0"
+                                                                        onClick={() => openModal(error)}
+                                                                        className="text-primary hover:text-blue-700 mr-2"
+                                                                        title="Editar"
                                                                     >
-                                                                        +
+                                                                        ✏️
                                                                     </button>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-2 py-4 text-sm text-gray-900">
-                                                            <div className="flex items-center">
-                                                                <div className="truncate flex-1" title={error.solucion}>
-                                                                    {error.solucion}
-                                                                </div>
-                                                                {error.solucion && error.solucion.length > 30 && (
                                                                     <button
-                                                                        onClick={() => showDetail(error.solucion, 'Solución')}
-                                                                        className="ml-1 text-primary hover:text-blue-700 text-xs flex-shrink-0"
+                                                                        onClick={() => deleteError(error.id)}
+                                                                        className="text-red-600 hover:text-red-900"
+                                                                        title="Eliminar"
                                                                     >
-                                                                        +
+                                                                        🗑️
                                                                     </button>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-2 py-4 text-sm text-gray-900">
-                                                            <div className="truncate" title={error.persona}>
-                                                                {error.persona}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-2 py-4 text-sm text-gray-900">
-                                                            <div className="truncate" title={error.area}>
-                                                                {error.area}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-2 py-4 text-center text-sm font-medium">
-                                                            <button
-                                                                onClick={() => openModal(error)}
-                                                                className="text-primary hover:text-blue-700 mr-2"
-                                                                title="Editar"
-                                                            >
-                                                                ✏️
-                                                            </button>
-                                                            <button
-                                                                onClick={() => deleteError(error.id)}
-                                                                className="text-red-600 hover:text-red-900"
-                                                                title="Eliminar"
-                                                            >
-                                                                🗑️
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
-                        )}
-                    </div>
 
-                    {/* Modal for Add/Edit */}
-                    {showModal && (
-                        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-                            <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl bg-white rounded-lg shadow-xl">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-lg font-medium text-gray-900">
-                                        {currentError?.id ? 'Editar Error' : 'Nuevo Error'}
-                                    </h3>
-                                    <button
-                                        onClick={closeModal}
-                                        className="text-gray-400 hover:text-gray-600"
-                                    >
-                                        ✕
-                                    </button>
+                            {/* Modal for Add/Edit */}
+                            {showModal && (
+                                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+                                    <div className="relative top-4 sm:top-20 mx-auto p-5 border w-full max-w-2xl bg-white rounded-lg shadow-xl">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="text-lg font-medium text-gray-900">
+                                                {currentError?.id ? 'Editar Error' : 'Nuevo Error'}
+                                            </h3>
+                                            <button
+                                                onClick={closeModal}
+                                                className="text-gray-400 hover:text-gray-600"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                        
+                                        <form onSubmit={handleSubmit} className="space-y-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700">Día y Hora</label>
+                                                    <input
+                                                        type="datetime-local"
+                                                        name="dia"
+                                                        defaultValue={currentError?.dia}
+                                                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700">Lugar</label>
+                                                    <select
+                                                        name="lugar"
+                                                        defaultValue={currentError?.lugar}
+                                                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                        required
+                                                    >
+                                                        <option value="TORRESPAÑA">TORRESPAÑA</option>
+                                                        <option value="PRADO DEL REY">PRADO DEL REY</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700">Programa</label>
+                                                    <input
+                                                        type="text"
+                                                        name="programa"
+                                                        defaultValue={currentError?.programa}
+                                                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700">Cámara</label>
+                                                    <input
+                                                        type="text"
+                                                        name="camara"
+                                                        defaultValue={currentError?.camara}
+                                                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Incidencia</label>
+                                                <textarea
+                                                    name="incidencia"
+                                                    rows="3"
+                                                    defaultValue={currentError?.incidencia}
+                                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                    required
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Solución</label>
+                                                <textarea
+                                                    name="solucion"
+                                                    rows="3"
+                                                    defaultValue={currentError?.solucion}
+                                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                />
+                                            </div>
+                                            
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700">Persona</label>
+                                                    <select
+                                                        name="persona"
+                                                        defaultValue={currentError?.persona || ''}
+                                                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                        required
+                                                    >
+                                                        <option value="">Seleccionar persona...</option>
+                                                        {personas.map((persona) => (
+                                                            <option key={persona} value={persona}>
+                                                                {persona}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700">Área</label>
+                                                    <input
+                                                        type="text"
+                                                        name="area"
+                                                        defaultValue={currentError?.area}
+                                                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex justify-end space-x-3 pt-4">
+                                                <button
+                                                    type="button"
+                                                    onClick={closeModal}
+                                                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                                >
+                                                    Cancelar
+                                                </button>
+                                                <button
+                                                    type="submit"
+                                                    className="px-4 py-2 bg-primary border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700"
+                                                >
+                                                    {currentError?.id ? 'Actualizar' : 'Crear'}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
-                                
-                                <form onSubmit={handleSubmit} className="space-y-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">Día y Hora</label>
-                                            <input
-                                                type="datetime-local"
-                                                name="dia"
-                                                defaultValue={currentError?.dia}
-                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">Lugar</label>
-                                            <select
-                                                name="lugar"
-                                                defaultValue={currentError?.lugar}
-                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                                required
-                                            >
-                                                <option value="TORRESPAÑA">TORRESPAÑA</option>
-                                                <option value="PRADO DEL REY">PRADO DEL REY</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">Programa</label>
-                                            <input
-                                                type="text"
-                                                name="programa"
-                                                defaultValue={currentError?.programa}
-                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">Cámara</label>
-                                            <input
-                                                type="text"
-                                                name="camara"
-                                                defaultValue={currentError?.camara}
-                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Incidencia</label>
-                                        <textarea
-                                            name="incidencia"
-                                            rows="3"
-                                            defaultValue={currentError?.incidencia}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                            required
-                                        />
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Solución</label>
-                                        <textarea
-                                            name="solucion"
-                                            rows="3"
-                                            defaultValue={currentError?.solucion}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                        />
-                                    </div>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">Persona</label>
-                                            <select
-                                                name="persona"
-                                                defaultValue={currentError?.persona || ''}
-                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                                required
-                                            >
-                                                <option value="">Seleccionar persona...</option>
-                                                {personas.map((persona) => (
-                                                    <option key={persona} value={persona}>
-                                                        {persona}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">Área</label>
-                                            <input
-                                                type="text"
-                                                name="area"
-                                                defaultValue={currentError?.area}
-                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="flex justify-end space-x-3 pt-4">
-                                        <button
-                                            type="button"
-                                            onClick={closeModal}
-                                            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-                                        >
-                                            Cancelar
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            className="px-4 py-2 bg-primary border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700"
-                                        >
-                                            {currentError?.id ? 'Actualizar' : 'Crear'}
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )}
+                            )}
 
-                    {/* Modal for Detail View */}
-                    {showDetailModal && (
-                        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-                            <div className="relative top-20 mx-auto p-5 border w-full max-w-lg bg-white rounded-lg shadow-xl">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-lg font-medium text-gray-900">{detailTitle}</h3>
-                                    <button
-                                        onClick={() => setShowDetailModal(false)}
-                                        className="text-gray-400 hover:text-gray-600"
-                                    >
-                                        ✕
-                                    </button>
+                            {/* Modal for Detail View */}
+                            {showDetailModal && (
+                                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+                                    <div className="relative top-4 sm:top-20 mx-auto p-5 border w-full max-w-lg bg-white rounded-lg shadow-xl">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="text-lg font-medium text-gray-900">{detailTitle}</h3>
+                                            <button
+                                                onClick={() => setShowDetailModal(false)}
+                                                className="text-gray-400 hover:text-gray-600"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                        <div className="text-sm text-gray-700 whitespace-pre-wrap">
+                                            {detailContent}
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="text-sm text-gray-700 whitespace-pre-wrap">
-                                    {detailContent}
-                                </div>
-                            </div>
-                        </div>
+                            )}
+                        </>
                     )}
                 </div>
             );
