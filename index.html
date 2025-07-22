@@ -93,7 +93,7 @@
                                 </div>
                                 
                                 <h2 className="text-2xl font-bold text-white mb-2">
-                                    Indidencias TRD
+                                    Acceso Requerido
                                 </h2>
                                 <p className="text-gray-300">
                                     Ingresa tu contraseña para continuar
@@ -166,7 +166,7 @@
             const [showLoginModal, setShowLoginModal] = useState(true);
             const [password, setPassword] = useState('');
             const [loginError, setLoginError] = useState('');
-            const [activeTab, setActiveTab] = useState('LOTERIAS');
+            const [activeTab, setActiveTab] = useState('VIRTUALES');
             const [errors, setErrors] = useState([]);
             const [filteredErrors, setFilteredErrors] = useState([]);
             const [searchTerm, setSearchTerm] = useState('');
@@ -180,9 +180,13 @@
             const CORRECT_PASSWORD = 'Auto1041';
 
             const tabs = [
-                { id: 'LOTERIAS', name: 'Loterías', icon: '🎰' },
+                { id: 'VIRTUALES', name: 'Virtuales', icon: '🎰' },
+                { id: 'WHATSAPP_WEB', name: 'WhatsApp Web', icon: '💬' },
+                { id: 'AQHT', name: 'AQHT', icon: '📺' },
                 { id: 'LENGUA_SIGNOS', name: 'Lengua de Signos', icon: '👋' },
-                { id: 'WHATSAPP_WEB', name: 'WhatsApp Web', icon: '💬' }
+                { id: 'MAÑANEROS', name: 'Mañaneros', icon: '☀️' },
+                { id: 'PRIME', name: 'Prime', icon: '⭐' },
+                { id: 'RA_DEPORTES', name: 'RA Deportes', icon: '⚽' }
             ];
 
             const personas = [
@@ -319,8 +323,15 @@
             }, [isAuthenticated]);
 
             useEffect(() => {
+                const currentProgramName = activeTab.replace('_', ' ');
                 const filtered = errors
-                    .filter(error => error.programa === activeTab.replace('_', ' '))
+                    .filter(error => {
+                        // Si estamos en la pestaña VIRTUALES, incluir también los datos de LOTERIAS
+                        if (activeTab === 'VIRTUALES') {
+                            return error.programa === 'VIRTUALES' || error.programa === 'LOTERIAS';
+                        }
+                        return error.programa === currentProgramName;
+                    })
                     .filter(error => 
                         error.incidencia.toLowerCase().includes(searchTerm.toLowerCase())
                     )
