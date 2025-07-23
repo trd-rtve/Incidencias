@@ -237,7 +237,7 @@
             const getCurrentDateTime = () => {
                 const now = new Date();
                 // Ajustar para zona horaria CEST (UTC+2)
-                const cestTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (60000 * 120)); // UTC+2
+                const cestTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (60000 * 240)); // UTC+2
                 return cestTime.toISOString().slice(0, 16);
             };
 
